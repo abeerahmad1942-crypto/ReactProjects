@@ -1,0 +1,78 @@
+# React Fundamentals — Quick Reference Notes
+
+## 1. JSX & Components
+- JSX compiles to `React.createElement()` calls under the hood — it's not HTML, it's JS.
+- Components are just functions that return JSX. Always start with a capital letter.
+- Two types: **Presentational** (just UI) vs **Container** (has logic/state).
+
+## 2. Virtual DOM (you've learned this — key mental model)
+- React keeps a lightweight copy of the real DOM in memory (Virtual DOM).
+- On state change → React creates a new Virtual DOM tree → **diffs** it against the old one (reconciliation) → updates only the changed nodes in the real DOM.
+- This is why React is fast: direct DOM manipulation is expensive, diffing + batched updates is cheap.
+- `key` prop in lists helps React identify which items changed/moved/removed during diffing — **never use array index as key if list order can change.**
+
+## 3. Props vs State
+| Props | State |
+|---|---|
+| Passed from parent | Local to component |
+| Read-only (immutable) | Mutable via setter |
+| Component re-renders when props change | Component re-renders when state changes |
+
+## 4. Core Hooks
+- **useState** — local state, triggers re-render on change.
+- **useEffect** — side effects (API calls, subscriptions, timers). Dependency array controls when it runs:
+  - `[]` → runs once on mount
+  - `[dep]` → runs when `dep` changes
+  - no array → runs on every render
+  - Always return a cleanup function for subscriptions/timers/listeners.
+- **useContext** — consume Context API values without prop drilling.
+- **useRef** — persist a mutable value across renders WITHOUT causing re-render. Also used to access DOM nodes directly.
+- **useMemo** — memoize expensive computed values.
+- **useCallback** — memoize function references (useful when passing callbacks to memoized child components).
+
+## 5. Custom Hooks
+- A custom hook is just a function starting with `use` that calls other hooks inside it.
+- Purpose: extract and reuse stateful logic across components (e.g. `useFetch`, `useLocalStorage`, `useDebounce`).
+- Rule: Hooks must be called at the top level — never inside loops, conditions, or nested functions.
+
+## 6. Context API
+- Solves **prop drilling** (passing props through many layers just to reach a deep child).
+- `createContext()` → `<Provider value={...}>` wraps the tree → `useContext(MyContext)` anywhere inside consumes it.
+- Good for: theme, auth user, language/locale, cart state.
+- Not a full replacement for state managers (Redux/Zustand) in large apps — Context re-renders ALL consumers when value changes, so don't overuse for high-frequency updates.
+
+## 7. React Router
+- `<BrowserRouter>` wraps the app, `<Routes>` + `<Route path="/x" element={<X/>} />` define pages.
+- `useNavigate()` for programmatic navigation, `useParams()` for dynamic route params (`/user/:id`), `useSearchParams()` for query strings.
+- Nested routes + `<Outlet/>` for layouts (e.g. shared navbar/sidebar with changing content).
+- `<Link>` instead of `<a>` — prevents full page reload (keeps it a true SPA).
+
+## 8. Component Lifecycle (functional equivalent)
+| Class lifecycle | Hook equivalent |
+|---|---|
+| componentDidMount | `useEffect(() => {...}, [])` |
+| componentDidUpdate | `useEffect(() => {...}, [dep])` |
+| componentWillUnmount | cleanup function inside `useEffect` |
+
+## 9. Common Beginner→Intermediate Gaps (worth targeting in projects)
+- **Lifting state up** — sharing state between sibling components via a common parent.
+- **Controlled vs uncontrolled inputs** — controlled = value tied to state (recommended).
+- **Conditional rendering patterns** — `&&`, ternary, early return.
+- **Derived state** — don't store what you can compute from existing state/props.
+- **API integration** — loading/error/success states, `fetch`/`axios`, `useEffect` cleanup with `AbortController`.
+- **Forms** — validation, controlled multi-field forms.
+- **Persistence** — `localStorage` sync via custom hook.
+- **Performance** — knowing when (and when NOT) to use `useMemo`/`useCallback`.
+
+## 10. Folder Structure (good habit for real projects)
+```
+src/
+  components/   → reusable UI pieces
+  pages/        → route-level components
+  hooks/        → custom hooks
+  context/      → context providers
+  utils/        → helper functions
+  assets/
+  App.jsx
+  main.jsx
+```
